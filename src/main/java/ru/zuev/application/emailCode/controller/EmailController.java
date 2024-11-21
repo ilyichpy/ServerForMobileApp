@@ -1,30 +1,48 @@
 package ru.zuev.application.emailCode.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Controller;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.zuev.application.emailCode.dto.EmailDto;
+import ru.zuev.application.emailCode.dto.EmailRequest;
 import ru.zuev.application.emailCode.dto.EmailResponse;
 import ru.zuev.application.emailCode.service.EmailSenderService;
-
-import javax.mail.MessagingException;
+import ru.zuev.application.emailCode.service.EmailVerifyService;
 
 @RestController
-@RequestMapping("v1/api/email")
+@RequestMapping("/api/v1")
+@RequiredArgsConstructor
 public class EmailController {
 
 	private final EmailSenderService emailSenderService;
-
-	public EmailController() {
-		this.emailSenderService = new EmailSenderService();
-	}
+	private final EmailVerifyService emailVerifyService;
 
 	@PostMapping("/send_code")
 	@ResponseStatus(HttpStatus.OK)
-	public EmailResponse generateAndSendEmail(@RequestBody EmailDto userEmail) {
+	public EmailResponse generateAndSendEmail(@RequestBody EmailRequest userEmail) {
 		int code = emailSenderService.sendMessage(userEmail);
 		return EmailResponse.builder()
 				.status(code)
 				.build();
+	}
+
+	@PostMapping("/verify")
+	public ResponseEntity<EmailResponse> verifyUser(@RequestBody EmailRequest userEmail) {
+		try {
+			int code = emailVerifyService.verify(userEmail);
+			return ResponseEntity.ok(
+					EmailResponse.builder()
+							.status(code)
+							.build()
+			);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body(
+							EmailResponse.builder()
+									.status(500) // Тело ответа
+									.build()
+					);
+		}
 	}
 }

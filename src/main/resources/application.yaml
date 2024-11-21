@@ -1,0 +1,19 @@
+server:
+  port: 8082
+---
+spring:
+  datasource:
+    url: ${ILYA_ZUEV_URL}
+    username: ${ILYA_ZUEV_USER}
+    password: ${ILYA_ZUEV_PASS}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+
